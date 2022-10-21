@@ -1,0 +1,12 @@
+# VSCode and other configuration
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+
+# Build output and intermediary files
+bin/*
+obj/*
+
+# GFX build outputs (Build with make gfx)
+src/gfx/convimg.out
+src/gfx/*.c
+src/gfx/*.h
