@@ -13,14 +13,15 @@ void nav::cursor_update() {
 
     if (kb_IsDown(kb_KeyRight))
         cursor_pos += Point8 { 1, 0 };
-    else if (kb_IsDown(kb_KeyLeft))
+    if (kb_IsDown(kb_KeyLeft))
         cursor_pos -= Point8 { 1, 0 };
-    else if (kb_IsDown(kb_KeyDown))
+    if (kb_IsDown(kb_KeyDown))
         cursor_pos += Point8 { 0, 1 };
-    else if (kb_IsDown(kb_KeyUp))
+    if (kb_IsDown(kb_KeyUp))
         cursor_pos -= Point8 { 0, 1 };
-    else
-        need_update = false;
+    // else
+    //     need_update = false;
+    
     
 
 }
