@@ -6,10 +6,6 @@
 
 #include "sim.h"
 
-#define MAX_PARTS 1000
-#define SIM_W 156
-#define SIM_H 104
-
 using std::vector;
 
 using namespace sim;
