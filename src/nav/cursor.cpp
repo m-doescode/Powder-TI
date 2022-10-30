@@ -13,11 +13,11 @@ Point8 cursor_pos { 50, 50 };
 void nav::cursor_update() {
     need_update = true;
 
-    if (kb_IsDown(kb_KeyRight) && cursor_pos.x <= SIM_W)
+    if (kb_IsDown(kb_KeyRight) && cursor_pos.x < (SIM_W - 1))
         cursor_pos += Point8 { 1, 0 };
     if (kb_IsDown(kb_KeyLeft) && cursor_pos.x > 0)
         cursor_pos -= Point8 { 1, 0 };
-    if (kb_IsDown(kb_KeyDown) && cursor_pos.y <= SIM_H)
+    if (kb_IsDown(kb_KeyDown) && cursor_pos.y < (SIM_H - 1))
         cursor_pos += Point8 { 0, 1 };
     if (kb_IsDown(kb_KeyUp) && cursor_pos.y > 0)
         cursor_pos -= Point8 { 0, 1 };
