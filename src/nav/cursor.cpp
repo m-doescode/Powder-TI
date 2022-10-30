@@ -13,14 +13,30 @@ Point8 cursor_pos { 50, 50 };
 void nav::cursor_update() {
     need_update = true;
 
-    if (kb_IsDown(kb_KeyRight) && cursor_pos.x < (SIM_W - 1))
-        cursor_pos += Point8 { 1, 0 };
-    if (kb_IsDown(kb_KeyLeft) && cursor_pos.x > 0)
-        cursor_pos -= Point8 { 1, 0 };
-    if (kb_IsDown(kb_KeyDown) && cursor_pos.y < (SIM_H - 1))
-        cursor_pos += Point8 { 0, 1 };
-    if (kb_IsDown(kb_KeyUp) && cursor_pos.y > 0)
-        cursor_pos -= Point8 { 0, 1 };
+    uint8_t factor = 1;
+    if (kb_IsDown(kb_Key2nd))
+        factor = 3;
+
+    if (kb_IsDown(kb_KeyRight)) {
+        cursor_pos.x += factor;
+        if (cursor_pos.x >= SIM_W || cursor_pos.x < 0)
+            cursor_pos.x = SIM_W - 1;
+    } else if (kb_IsDown(kb_KeyLeft)) {
+        cursor_pos.x -= factor;
+        if (cursor_pos.x >= SIM_W || cursor_pos.x < 0)
+            cursor_pos.x = 0;
+    }
+
+    if (kb_IsDown(kb_KeyDown)) {
+        cursor_pos.y += factor;
+        if (cursor_pos.y >= SIM_H || cursor_pos.y < 0)
+            cursor_pos.y = SIM_H - 1;
+    } else if (kb_IsDown(kb_KeyUp)) {
+        cursor_pos.y -= factor;
+        if (cursor_pos.y >= SIM_H || cursor_pos.y < 0)
+            cursor_pos.y = 0;
+    }
+
     // else
     //     need_update = false;
 
