@@ -2,11 +2,14 @@
 #include <keypadc.h>
 #include "common.h"
 #include "debug.h"
+#include <time.h>
 
 #include "gfx/gfx.h"
 
 #include "sim/sim.h"
 #include "nav/cursor.h"
+
+clock_t time_last = 0;
 
 int main() {
     gfx_Begin();
@@ -36,6 +39,13 @@ int main() {
 
         nav::cursor_update();
         nav::cursor_render();
+
+        clock_t now = clock();
+
+        clock_t diff = now - time_last;
+        dbg_printf("FPS: %f\n", 1.0F / ((double)diff / CLOCKS_PER_SEC));
+
+        time_last = now;
         
         gfx_BlitBuffer();
     }
