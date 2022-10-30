@@ -187,6 +187,14 @@ bool sim::move_part(PartId p, uint8_t newX, uint8_t newY, bool f) {
     return true;
 }
 
+bool sim::part_exists(uint8_t x, uint8_t y) {
+    return pmap[y][x] != -1; 
+}
+
+bool sim::part_exists(PartId index) {
+    return parts[index].type != 0;
+}
+
 // Particle sim::get_part(uint8_t x, uint8_t y) {
 //     if (!IN_BOUNDS(x, y))
 //         throw "Out of bounds";

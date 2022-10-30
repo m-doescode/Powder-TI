@@ -25,6 +25,9 @@ namespace sim {
     bool can_move_part(uint8_t newX, uint8_t newY);
     bool move_part(PartId p, uint8_t newX, uint8_t newY, bool f = false);
 
+    bool part_exists(uint8_t x, uint8_t y);
+    bool part_exists(PartId index);
+
     //Particle get_part(uint8_t x, uint8_t y);
     //Particle get_part(PartId index);
 }

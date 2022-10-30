@@ -37,6 +37,15 @@ void nav::cursor_update() {
             cursor_pos.y = 0;
     }
 
+    
+    if (kb_IsDown(kb_KeyEnter)) {
+        sim::create_part(-1, cursor_pos.x, cursor_pos.y, 1);
+    }
+    
+    if (kb_IsDown(kb_Key8) && sim::part_exists(cursor_pos.x, cursor_pos.y)) {
+        sim::delete_part(cursor_pos.x, cursor_pos.y);
+    }
+
     // else
     //     need_update = false;
 
