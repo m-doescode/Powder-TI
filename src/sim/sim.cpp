@@ -61,7 +61,7 @@ void sim::init_sim() {
 }
 
 void update_falling_particles() {
-    dbg_printf("in update_falling_particles\n");
+    //dbg_printf("in update_falling_particles\n");
     int rp = 0; // Real parts
     for (int p = 0; p < MAX_PARTS && rp < parts_num; p++) {
         if (parts[p].type == 0)
@@ -72,16 +72,16 @@ void update_falling_particles() {
         if (part.type == 1) {
             if (part.y <= 0)
                 continue;
-            dbg_printf("%d: %d at (%d, %d)\n", p, pmap[part.y][part.x], part.x, part.y);
+            //dbg_printf("%d: %d at (%d, %d)\n", p, pmap[part.y][part.x], part.x, part.y);
             // Attempt to move sand down
-            if (sim::can_move_part(part.x, part.y - 1)) {
-                sim::move_part(p, part.x, part.y - 1, true); // Save cycles by setting force to true
+            if (sim::can_move_part(part.x, part.y + 1)) {
+                sim::move_part(p, part.x, part.y + 1, true); // Save cycles by setting force to true
             // Attempt to move sand down right
-            } else if (sim::can_move_part(part.x - 1, part.y - 1)) {
-                sim::move_part(p, part.x - 1, part.y - 1, true);
+            } else if (sim::can_move_part(part.x + 1, part.y + 1)) {
+                sim::move_part(p, part.x + 1, part.y + 1, true);
             // Attempt to move sand down left
-            } else if (sim::can_move_part(part.x + 1, part.y - 1)) {
-                sim::move_part(p, part.x + 1, part.y - 1, true);
+            } else if (sim::can_move_part(part.x - 1, part.y + 1)) {
+                sim::move_part(p, part.x - 1, part.y + 1, true);
             }
         }
     }
