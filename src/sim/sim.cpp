@@ -93,7 +93,7 @@ void sim::update_sim() {
 
 void sim::render_sim() {
     gfx_SetColor(gfx_RGBTo1555(0, 0, 0));
-    gfx_FillRectangle(4, 4, SIM_W * 2 - 4, SIM_H * 2 - 4);
+    gfx_FillRectangle(4, 4, SIM_W * 2, SIM_H * 2);
 
     gfx_SetColor(gfx_RGBTo1555(255, 224, 160));
     int rp = 0; // Real parts
