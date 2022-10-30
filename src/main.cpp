@@ -6,6 +6,7 @@
 #include "gfx/gfx.h"
 
 #include "sim/sim.h"
+#include "nav/cursor.h"
 
 int main() {
     gfx_Begin();
@@ -33,6 +34,8 @@ int main() {
             sim::render_sim();
         //}
 
+        nav::cursor_update();
+        nav::cursor_render();
         
         gfx_BlitBuffer();
     }
