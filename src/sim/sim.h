@@ -28,8 +28,7 @@ namespace sim {
     bool part_exists(uint8_t x, uint8_t y);
     bool part_exists(PartId index);
 
-    uint32_t frame_count();
+    bool DEBUG_is_dynamic(uint8_t x, uint8_t y);
 
-    //Particle get_part(uint8_t x, uint8_t y);
-    //Particle get_part(PartId index);
+    uint32_t frame_count();
 }

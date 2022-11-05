@@ -92,23 +92,32 @@ void update_falling_particles() {
         rp++;
 
         Particle part = parts[p];
-        if (part.type == 1 && part.dynamic == 1) {
-            if (part.y <= 0)
-                continue;
-            //dbg_printf("%d: %d at (%d, %d)\n", p, pmap[part.y][part.x], part.x, part.y);
-            // Attempt to move sand down
-            if (sim::can_move_part(part.x, part.y + 1)) {
-                sim::move_part(p, part.x, part.y + 1, true); // Save cycles by setting force to true
-            // Attempt to move sand down right
-            } else if (sim::can_move_part(part.x + 1, part.y + 1)) {
-                sim::move_part(p, part.x + 1, part.y + 1, true);
-            // Attempt to move sand down left
-            } else if (sim::can_move_part(part.x - 1, part.y + 1)) {
-                sim::move_part(p, part.x - 1, part.y + 1, true);
-            // Mark sand as stationary
-            } else {
-                parts[p].dynamic = 0;
-            }
+        if (!(part.type == 1 && part.dynamic == 1))
+            continue;
+
+        // If the particle hits rock bottom, make it static
+        if (part.y >= (SIM_H - 1)) {
+            parts[p].dynamic = 0;
+            continue;
+        }
+        
+        // Attempt to move particle to new pos
+        if (move_part(p, part.x, part.y + 1))
+            // If successful, move on...
+            continue;
+        // If the particle we're trying to replace is dynamic, stay put.
+        else if (parts[pmap[part.y + 1][part.x]].dynamic)
+            continue;
+        // Attempt to move particle to new pos
+        else if (move_part(p, part.x + 1, part.y + 1))
+            continue;
+        // Attempt to move particle to new pos
+        else if (move_part(p, part.x - 1, part.y + 1))
+            continue;
+        // Otherwise, stay put and become static.
+        else {
+            parts[p].dynamic = 0;
+            continue;
         }
     }
 }
@@ -131,7 +140,7 @@ void sim::render_sim() {
 
         Particle part = parts[p];
         gfx_FillRectangle(part.x * 2 + 4, part.y * 2 + 4, 2, 2);
-
+    
     }
 }
 
@@ -234,16 +243,9 @@ uint32_t sim::frame_count() {
     return frames;
 }
 
-// Particle sim::get_part(uint8_t x, uint8_t y) {
-//     if (!IN_BOUNDS(x, y))
-//         throw "Out of bounds";
-    
-//     return get_part(pmap[y][x]);
-// }
-
-// Particle sim::get_part(PartId index) {
-//     if (index < 0 | index >= 1000)
-//         throw "Out of bounds!";
-
-//     return parts[index];
-// }
+bool sim::DEBUG_is_dynamic(uint8_t x, uint8_t y) {
+    if (pmap[y][x] == -1)
+        return 0;
+    else
+        return parts[pmap[y][x]].dynamic;    
+}
