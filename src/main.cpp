@@ -11,6 +11,11 @@
 
 clock_t time_last = 0;
 
+bool render = 1;
+bool simulate = 0;
+
+bool keydetec = 0;
+
 int main() {
     gfx_Begin();
 
@@ -29,13 +34,23 @@ int main() {
     do {
         kb_Scan();
 
-        if (kb_IsDown(kb_Key0)) {
+        if (simulate) {
             sim::update_sim();
         }
 
-        //if (kb_IsDown(kb_KeyChs)) {
+        if (render) {
             sim::render_sim();
-        //}
+        }
+
+        if (!keydetec) {
+            if (kb_IsDown(kb_Key9))
+                render = !render;
+            if (kb_IsDown(kb_Key0))
+                simulate = !simulate;
+        }
+
+        keydetec = (kb_IsDown(kb_Key0) || kb_IsDown(kb_Key9));
+        
 
         nav::cursor_update();
         nav::cursor_render();
@@ -43,7 +58,8 @@ int main() {
         clock_t now = clock();
 
         clock_t diff = now - time_last;
-        dbg_printf("FPS: %f\t\tFRN: %lu\n", 1.0F / ((double)diff / CLOCKS_PER_SEC), sim::frame_count());
+        nav::Point8 cpos = nav::cursor_getpos();
+        dbg_printf("FPS: %f\t\tFRN: %lu\t\tDYN: %d\n", 1.0F / ((double)diff / CLOCKS_PER_SEC), sim::frame_count(), sim::DEBUG_is_dynamic(cpos.x, cpos.y));
 
         time_last = now;
         
