@@ -179,13 +179,16 @@ PartId sim::create_part(PartId pIdx, uint8_t x, uint8_t y, uint8_t type) {
     }
 }
 
-void sim::delete_part(uint8_t x, uint8_t y) {
-    delete_part(pmap[y][x]);
+void sim::delete_part(uint8_t x, uint8_t y, bool update) {
+    delete_part(pmap[y][x], update);
 }
 
-void sim::delete_part(PartId index) {
+void sim::delete_part(PartId index, bool update) {
     Particle part = parts[index];
     pmap[part.y][part.x] = -1;
+
+    if (update)
+        update_surrounding_parts(part.x, part.y);
 
     parts[index].type = 0;
     parts[index].meta = pfree;

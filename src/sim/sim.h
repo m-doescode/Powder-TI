@@ -19,8 +19,8 @@ namespace sim {
 
     PartId create_part(PartId pIdx, uint8_t x, uint8_t y, uint8_t type);
 
-    void delete_part(uint8_t x, uint8_t y);
-    void delete_part(PartId index);
+    void delete_part(uint8_t x, uint8_t y, bool update = true);
+    void delete_part(PartId index, bool update = true);
 
     bool can_move_part(uint8_t newX, uint8_t newY);
     bool move_part(PartId p, uint8_t newX, uint8_t newY, bool f = false, bool update = true);
