@@ -84,6 +84,9 @@ void update_surrounding_parts(uint8_t x, uint8_t y) {
 }
 
 void update_falling_particles() {
+    // Make it alternate between left and right sidedness
+    int8_t xparity = (frames % 2) * 2 - 1;
+
     //dbg_printf("in update_falling_particles\n");
     int rp = 0; // Real parts
     for (int p = 0; p < MAX_PARTS && rp < parts_num; p++) {
@@ -109,10 +112,10 @@ void update_falling_particles() {
         else if (parts[pmap[part.y + 1][part.x]].dynamic)
             continue;
         // Attempt to move particle to new pos
-        else if (move_part(p, part.x + 1, part.y + 1))
+        else if (move_part(p, part.x + 1 * xparity, part.y + 1))
             continue;
         // Attempt to move particle to new pos
-        else if (move_part(p, part.x - 1, part.y + 1))
+        else if (move_part(p, part.x - 1 * xparity, part.y + 1))
             continue;
         // Otherwise, stay put and become static.
         else {
