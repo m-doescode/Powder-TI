@@ -1,0 +1,23 @@
+
+    if (cursor_pos.x < 0) {
+        cursor_pos.x = 0;
+    } else if (cursor_pos.x >= SIM_W) {
+        cursor_pos.x = SIM_W - 1;
+    }
+
+    if (cursor_pos.y < 0) {
+        cursor_pos.y = 0;
+    } else if (cursor_pos.y >= SIM_H) {
+        cursor_pos.y = SIM_H - 1;
+    }
+
+
+if (kb_IsDown(kb_KeyRight) && cursor_pos.x < (SIM_W - factor))
+        cursor_pos += Point8 { 1, 0 } * factor_p;
+    if (kb_IsDown(kb_KeyLeft) && cursor_pos.x >= factor)
+        cursor_pos -= Point8 { 1, 0 } * factor_p;
+    if (kb_IsDown(kb_KeyDown) && cursor_pos.y < (SIM_H - factor))
+        cursor_pos += Point8 { 0, 1 } * factor_p;
+    if (kb_IsDown(kb_KeyUp) && cursor_pos.y >= factor)
+        cursor_pos -= Point8 { 0, 1 } * factor_p;
+    // else

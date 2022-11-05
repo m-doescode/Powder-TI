@@ -15,6 +15,8 @@ PartId pmap[SIM_W][SIM_H];
 uint16_t parts_num;
 PartId pfree;
 
+uint32_t frames;
+
 bool sim::can_add_particle() {
     return parts_num < MAX_PARTS;
 }
@@ -40,6 +42,7 @@ PartId pop_id() {
 //
 
 void sim::init_sim() {
+    frames = 0;
     parts_num = 0;
     pfree = 0;
 	memset(pmap, 0, sizeof(pmap));
@@ -60,6 +63,26 @@ void sim::init_sim() {
     gfx_Rectangle(3, 3, GFX_LCD_WIDTH - 6, GFX_LCD_HEIGHT - 6);
 }
 
+void update_surrounding_parts(uint8_t x, uint8_t y) {
+    static const int8_t vecs[8][2] {
+        { 0, 1 },
+        { 1, 0},
+        { 0, -1 },
+        { -1, 0 },
+        { 1, 1 },
+        { 1, -1},
+        { -1, -1 },
+        { -1, 1 }
+    };
+
+    for (int i = 0; i < 8; i++) {
+        PartId partid = pmap[y + vecs[i][1]][x + vecs[i][0]];
+        if (partid != -1) {
+            parts[partid].dynamic = 1;
+        }
+    }
+}
+
 void update_falling_particles() {
     //dbg_printf("in update_falling_particles\n");
     int rp = 0; // Real parts
@@ -69,7 +92,7 @@ void update_falling_particles() {
         rp++;
 
         Particle part = parts[p];
-        if (part.type == 1) {
+        if (part.type == 1 && part.dynamic == 1) {
             if (part.y <= 0)
                 continue;
             //dbg_printf("%d: %d at (%d, %d)\n", p, pmap[part.y][part.x], part.x, part.y);
@@ -82,12 +105,16 @@ void update_falling_particles() {
             // Attempt to move sand down left
             } else if (sim::can_move_part(part.x - 1, part.y + 1)) {
                 sim::move_part(p, part.x - 1, part.y + 1, true);
+            // Mark sand as stationary
+            } else {
+                parts[p].dynamic = 0;
             }
         }
     }
 }
 
 void sim::update_sim() {
+    frames++;
     update_falling_particles();
 }
 
@@ -123,6 +150,7 @@ PartId sim::create_part(PartId pIdx, uint8_t x, uint8_t y, uint8_t type) {
         parts[i].meta = 0;
         parts[i].x = x;
         parts[i].y = y;
+        parts[i].dynamic = 1;
 
         pmap[y][x] = i;
 
@@ -143,6 +171,7 @@ PartId sim::create_part(PartId pIdx, uint8_t x, uint8_t y, uint8_t type) {
         parts[pIdx].meta = 0;
         parts[pIdx].x = x;
         parts[pIdx].y = y;
+        parts[pIdx].dynamic = 1;
 
         pmap[y][x] = pIdx;
 
@@ -162,6 +191,7 @@ void sim::delete_part(PartId index) {
     parts[index].meta = pfree;
     parts[index].y = 0;
     parts[index].x = 0;
+    parts[index].dynamic = 0;
 
     pfree = index;
     
@@ -172,12 +202,14 @@ bool sim::can_move_part(uint8_t newX, uint8_t newY) {
     return newX < SIM_W && newY < SIM_H && (pmap[newY][newX] == -1);
 }
 
-bool sim::move_part(PartId p, uint8_t newX, uint8_t newY, bool f) {
+bool sim::move_part(PartId p, uint8_t newX, uint8_t newY, bool f, bool update) {
     // If force move is false, then check if the new position is free to move the particle to.
     if (!f && !can_move_part(newX, newY))
         return false;
     
     Particle part = parts[p];
+    if (update)
+        update_surrounding_parts(part.x, part.y);
     pmap[newY][newX] = p;
     pmap[part.y][part.x] = -1;
     part.x = newX;
@@ -193,6 +225,10 @@ bool sim::part_exists(uint8_t x, uint8_t y) {
 
 bool sim::part_exists(PartId index) {
     return parts[index].type != 0;
+}
+
+uint32_t sim::frame_count() {
+    return frames;
 }
 
 // Particle sim::get_part(uint8_t x, uint8_t y) {

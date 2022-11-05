@@ -12,5 +12,6 @@ namespace sim {
         int16_t meta;
         uint8_t x;
         uint8_t y;
+        uint8_t dynamic : 1;
     };
 }

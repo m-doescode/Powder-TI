@@ -23,10 +23,12 @@ namespace sim {
     void delete_part(PartId index);
 
     bool can_move_part(uint8_t newX, uint8_t newY);
-    bool move_part(PartId p, uint8_t newX, uint8_t newY, bool f = false);
+    bool move_part(PartId p, uint8_t newX, uint8_t newY, bool f = false, bool update = true);
 
     bool part_exists(uint8_t x, uint8_t y);
     bool part_exists(PartId index);
+
+    uint32_t frame_count();
 
     //Particle get_part(uint8_t x, uint8_t y);
     //Particle get_part(PartId index);
