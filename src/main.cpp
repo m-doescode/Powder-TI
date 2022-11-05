@@ -43,7 +43,7 @@ int main() {
         clock_t now = clock();
 
         clock_t diff = now - time_last;
-        dbg_printf("FPS: %f\n", 1.0F / ((double)diff / CLOCKS_PER_SEC));
+        dbg_printf("FPS: %f\t\tFRN: %lu\n", 1.0F / ((double)diff / CLOCKS_PER_SEC), sim::frame_count());
 
         time_last = now;
         
