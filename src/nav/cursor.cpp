@@ -56,3 +56,16 @@ void nav::cursor_render() {
     gfx_SetColor(3);
     gfx_FillRectangle(cursor_pos.x * 2 + 4, cursor_pos.y * 2 + 4, 2, 2);
 }
+
+void nav::cursor_moveto(Point8 pos) {
+    if (pos.x >= SIM_W)
+        pos.x = SIM_W - 1;
+    if (pos.y >= SIM_H)
+        pos.y = SIM_H - 1;
+
+    cursor_pos = pos;
+}
+
+Point8 nav::cursor_getpos() {
+    return cursor_pos;
+}
