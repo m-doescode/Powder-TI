@@ -4,6 +4,7 @@
 #include <graphx.h>
 #include <debug.h>
 
+#include "common_externs.h"
 #include "sim_renderer.h"
 
 #include "sim.h"
@@ -140,6 +141,7 @@ void sim::render_sim() {
 //
 
 PartId sim::create_part(PartId pIdx, uint8_t x, uint8_t y, uint8_t type) {
+    
     if (pIdx == -1) {
 
         PartId i = pfree;
@@ -157,6 +159,8 @@ PartId sim::create_part(PartId pIdx, uint8_t x, uint8_t y, uint8_t type) {
 
         parts_num++;
 
+        render::update_part(x, y);
+
         return i;
     } else {
         // Check if the existing particle exists
@@ -167,6 +171,9 @@ PartId sim::create_part(PartId pIdx, uint8_t x, uint8_t y, uint8_t type) {
         // pmap[y][x] != -1 | Check if there is a particle. pmap[y][x] != pIdx | Check that it is not the particle we're overwriting.
         if (pmap[y][x] != -1 && pmap[y][x] != pIdx)
             return -1;
+
+        //render::update_part(x, y);
+        //render::update_part(parts[pIdx].x, parts[pIdx].y);
 
         parts[pIdx].type = type;
         parts[pIdx].meta = 0;
@@ -190,6 +197,8 @@ void sim::delete_part(PartId index, bool update) {
 
     if (update)
         update_surrounding_parts(part.x, part.y);
+
+    render::update_part(part.x, part.y);
 
     parts[index].type = 0;
     parts[index].meta = pfree;
