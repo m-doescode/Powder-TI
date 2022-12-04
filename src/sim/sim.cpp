@@ -17,6 +17,8 @@ PartId pmap[SIM_W][SIM_H];
 uint16_t parts_num;
 PartId pfree;
 
+bool render_state = true;
+bool simulation_state = false;
 uint32_t frames;
 
 bool sim::can_add_particle() {
@@ -116,8 +118,9 @@ void update_part(PartId partId, bool xparity) {
 }
 
 void sim::update_sim() {
-    frames++;
-    
+    if (simulation_state)
+        frames++;
+
     // Make it alternate between left and right sidedness
     int8_t xparity = (frames % 2) * 2 - 1;
 
@@ -133,8 +136,12 @@ void sim::update_sim() {
         if (!(part.type == 1 && part.dynamic == 1))
             continue;
 
-        update_part(p, xparity);
+        if (simulation_state)
+            update_part(p, xparity);
     }
+
+    if (render_state)
+        render_sim();
 }
 
 void sim::render_sim() {
@@ -259,4 +266,23 @@ bool sim::DEBUG_is_dynamic(uint8_t x, uint8_t y) {
         return 0;
     else
         return parts[pmap[y][x]].dynamic;    
+}
+
+// 0 = Off, 1 = On, -1 = Toggle
+void sim::set_render_state(int8_t new_state) {
+    render_state = (new_state == -1) ? !render_state : new_state;
+}
+
+// 0 = Off, 1 = On, -1 = Toggle
+void sim::set_simulation_state(int8_t new_state) {
+    simulation_state = (new_state == -1) ? !simulation_state : new_state;
+}
+
+
+bool sim::get_render_state() {
+    return render_state;
+}
+
+bool sim::get_simulation_state() {
+    return simulation_state;
 }

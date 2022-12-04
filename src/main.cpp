@@ -11,9 +11,6 @@
 
 clock_t time_last = 0;
 
-bool render = 1;
-bool simulate = 0;
-
 bool keydetec = 0;
 
 int main() {
@@ -34,19 +31,13 @@ int main() {
     do {
         kb_Scan();
 
-        if (simulate) {
-            sim::update_sim();
-        }
-
-        if (render) {
-            sim::render_sim();
-        }
+        sim::update_sim();
 
         if (!keydetec) {
             if (kb_IsDown(kb_Key9))
-                render = !render;
+                sim::set_render_state(-1); // Toggle
             if (kb_IsDown(kb_Key0))
-                simulate = !simulate;
+                sim::set_simulation_state(-1);
         }
 
         keydetec = (kb_IsDown(kb_Key0) || kb_IsDown(kb_Key9));

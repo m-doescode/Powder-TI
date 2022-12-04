@@ -28,6 +28,12 @@ namespace sim {
     bool part_exists(uint8_t x, uint8_t y);
     bool part_exists(PartId index);
 
+    void set_render_state(int8_t new_state);
+    void set_simulation_state(int8_t new_state);
+
+    bool get_render_state();
+    bool get_simulation_state();
+
     bool DEBUG_is_dynamic(uint8_t x, uint8_t y);
 
     uint32_t frame_count();
