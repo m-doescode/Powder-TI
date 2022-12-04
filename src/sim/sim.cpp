@@ -85,51 +85,56 @@ void update_surrounding_parts(uint8_t x, uint8_t y) {
     }
 }
 
-void update_falling_particles() {
+void update_part(PartId partId, bool xparity) {
+
+    Particle* part = &parts[partId]; // (parts + partId)
+
+    // If the particle hits rock bottom, make it static
+    if (part->y >= (SIM_H - 1)) {
+        part->dynamic = 0;
+        return;
+    }
+    
+    // Attempt to move particle to new pos (0,1)
+    if (move_part(partId, part->x, part->y + 1))
+        // If successful, move on...
+        return;
+    // If the particle we're trying to replace is dynamic, stay put. (0,1)
+    else if (parts[pmap[part->y + 1][part->x]].dynamic)
+        return;
+    // Attempt to move particle to new pos (1/-1,1)
+    else if (move_part(partId, part->x + 1 * xparity, part->y + 1))
+        return;
+    // Attempt to move particle to new pos (-1/1,1)
+    else if (move_part(partId, part->x - 1 * xparity, part->y + 1))
+        return;
+    // Otherwise, stay put and become static.
+    else {
+        part->dynamic = 0;
+        return;
+    }
+}
+
+void sim::update_sim() {
+    frames++;
+    
     // Make it alternate between left and right sidedness
     int8_t xparity = (frames % 2) * 2 - 1;
 
     //dbg_printf("in update_falling_particles\n");
     int rp = 0; // Real parts
     for (int p = 0; p < MAX_PARTS && rp < parts_num; p++) {
+        Particle part = parts[p];
         if (parts[p].type == 0)
             continue;
         rp++;
 
-        Particle part = parts[p];
+        // part.type == 1 because only DUST (1) is supported.
         if (!(part.type == 1 && part.dynamic == 1))
             continue;
 
-        // If the particle hits rock bottom, make it static
-        if (part.y >= (SIM_H - 1)) {
-            parts[p].dynamic = 0;
-            continue;
-        }
-        
-        // Attempt to move particle to new pos
-        if (move_part(p, part.x, part.y + 1))
-            // If successful, move on...
-            continue;
-        // If the particle we're trying to replace is dynamic, stay put.
-        else if (parts[pmap[part.y + 1][part.x]].dynamic)
-            continue;
-        // Attempt to move particle to new pos
-        else if (move_part(p, part.x + 1 * xparity, part.y + 1))
-            continue;
-        // Attempt to move particle to new pos
-        else if (move_part(p, part.x - 1 * xparity, part.y + 1))
-            continue;
-        // Otherwise, stay put and become static.
-        else {
-            parts[p].dynamic = 0;
-            continue;
-        }
+        update_part(p, xparity);
     }
-}
-
-void sim::update_sim() {
-    frames++;
-    update_falling_particles();
 }
 
 void sim::render_sim() {
