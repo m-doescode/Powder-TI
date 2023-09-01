@@ -11,17 +11,20 @@ typedef uint16_t upos;
 typedef uint8_t parttype_t;
 
 struct Particle {
-    uint8_t type;
+    uint8_t type : 7;
+    bool movedParity : 1;
 };
 
 Particle* grid = new Particle[SCREEN_WIDTH * SCREEN_HEIGHT] {};
 
+bool globalParity = 0;
+
 void set_part(upos x, upos y, parttype_t type) {
-    grid[y * SCREEN_WIDTH + x] = { type };
+    grid[y * SCREEN_WIDTH + x] = { type, globalParity };
 }
 
-void set_part_buf(upos x, upos y, parttype_t type, Particle* gridBuffer) {
-    gridBuffer[y * SCREEN_WIDTH + x] = { type };
+void set_part_sim(upos x, upos y, parttype_t type) {
+    grid[y * SCREEN_WIDTH + x] = { type, !globalParity };
 }
 
 Particle get_part(upos x, upos y) {
@@ -52,9 +55,7 @@ void render_sim() {
 
 void simulate_once() {
     clock_t cock = clock(); // CLOck Count (K)onstant
-    
-    Particle* gridBuffer = new Particle[SCREEN_WIDTH * SCREEN_HEIGHT] {};
-    
+
     for (int x = 0, y = 0; y < SCREEN_HEIGHT; x++) {
         if (x >= SCREEN_WIDTH) {
             x = 0;
@@ -62,21 +63,32 @@ void simulate_once() {
         }
 
         Particle part = get_part(x, y);
+
+        // Ignore empty grid spaces
         if (part.type == 0)
+            continue;
+
+        // Don't move the particle if already at the bottom of the sim
+        if ((y + 1) >= SCREEN_HEIGHT)
+            continue;
+
+        // Do not move if already moved based on parity bit
+        if (globalParity != part.movedParity)
             continue;
         
         if (get_part(x, y + 1).type == 0) // Down
-            set_part_buf(x, y + 1, part.type, gridBuffer);
+            set_part_sim(x, y + 1, part.type);
         else if (get_part(x + 1, y + 1).type == 0) // Down right
-            set_part_buf(x + 1, y + 1, part.type, gridBuffer);
+            set_part_sim(x + 1, y + 1, part.type);
         else if (get_part(x - 1, y + 1).type == 0) // Down left
-            set_part_buf(x - 1, y + 1, part.type, gridBuffer);
+            set_part_sim(x - 1, y + 1, part.type);
         else // Do not move
-            set_part_buf(x, y, part.type, gridBuffer);
+            continue;
+
+        set_part_sim(x, y, 0);
     }
 
-    delete[] grid;
-    grid = gridBuffer;
+    globalParity = !globalParity;
     
     dbg_printf("Time taken: %f\n", ((double)(clock() - cock)) / CLOCKS_PER_SEC);
 }
@@ -97,18 +109,15 @@ int main() {
 
     simulate_once();
     init_sim();
-    render_sim();
-    simulate_once();
-    render_sim();
 
-    for (int x = 0; x < 100; x++) {
-        for (int y = 0; y < 100; y++) {
-            set_part(x, y, 1);
-        }
+    for (int i = 0; i < 1000; i++) {
+    grid[i] = { 1, globalParity };
     }
 
-    render_sim();
-    // simulate_once();
+    for (int i = 0; i < 1000; i++) {
+        simulate_once();
+        render_sim();
+    }
 
     // sleep(1);
     os_GetKey();
