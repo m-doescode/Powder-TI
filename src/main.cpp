@@ -9,40 +9,11 @@
 #define TI84
 #include "linkedlist.h"
 
+#include "part.h"
+
 static constexpr uint16_t SCREEN_WIDTH = 160, SCREEN_HEIGHT = 120;
 static constexpr uint16_t MAX_PARTS = SCREEN_WIDTH * SCREEN_HEIGHT;
 static constexpr uint16_t NO_PART = 0xFFFF;
-
-typedef uint16_t upos;
-typedef uint16_t partidx_t;
-typedef uint8_t parttype_t;
-
-struct partpos_t {
-    upos x;
-    upos y;
-
-    partpos_t operator +(const partpos_t other) {
-        return { (upos)(x + other.x), (upos)(y + other.y) };
-    }
-
-    partpos_t operator -(const partpos_t other) {
-        return { (upos)(x - other.x), (upos)(y - other.y) };
-    }
-
-    partpos_t operator *(const partpos_t other) {
-        return { (upos)(x * other.x), (upos)(y * other.y) };
-    }
-
-    partpos_t operator /(const partpos_t other) {
-        return { (upos)(x / other.x), (upos)(y / other.y) };
-    }
-};
-
-struct Particle {
-    uint8_t type : 7;
-    bool part_static : 1;
-    partpos_t pos;
-};
 
 partidx_t* grid = new partidx_t[MAX_PARTS] { };
 LinkedList<Particle> parts;
@@ -53,7 +24,7 @@ LinkedList<Particle> parts;
 Particle part_at(upos x, upos y) {
     partidx_t idx = grid[y * SCREEN_WIDTH + x];
     if (idx == NO_PART)
-        return { 0, 0, { x, y } };
+        return { 0, 0, partpos_t { x, y } };
     return parts.get(idx);
 }
 
@@ -64,7 +35,7 @@ partidx_t idx_at(partpos_t pos) {
 partidx_t add_part(upos x, upos y, parttype_t type) {
     if (grid[y * SCREEN_WIDTH + x] != NO_PART)
         throw("Particle already exists at (%d, %d), value: %d\n", x, y, grid[y * SCREEN_WIDTH + x]);
-    Particle part { type, 0, { x, y } };
+    Particle part { type, 0, partpos_t { x, y } };
     partidx_t idx = parts.push_back(part);
     grid[y * SCREEN_WIDTH + x] = idx;
     
