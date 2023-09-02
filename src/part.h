@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 typedef uint16_t upos;
@@ -8,21 +9,10 @@ struct partpos_t {
     upos x;
     upos y;
 
-    partpos_t operator +(const partpos_t other) {
-        return { (upos)(x + other.x), (upos)(y + other.y) };
-    }
-
-    partpos_t operator -(const partpos_t other) {
-        return { (upos)(x - other.x), (upos)(y - other.y) };
-    }
-
-    partpos_t operator *(const partpos_t other) {
-        return { (upos)(x * other.x), (upos)(y * other.y) };
-    }
-
-    partpos_t operator /(const partpos_t other) {
-        return { (upos)(x / other.x), (upos)(y / other.y) };
-    }
+    partpos_t operator +(const partpos_t other);
+    partpos_t operator -(const partpos_t other);
+    partpos_t operator *(const partpos_t other);
+    partpos_t operator /(const partpos_t other);
 };
 
 struct Particle {

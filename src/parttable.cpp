@@ -1,12 +1,15 @@
+#include <debug.h>
+
 #include "parttable.h"
 
 PartTable::PartTable(partidx_t alloc_size) {
     this->parts = new Particle[alloc_size];
     free_idx = 0;
-    for (int i = 0; i < alloc_size; i++) {
-        parts[i] = Particle { 0, 0, partidx_t { i + 1 } };
+    for (partidx_t i = 0; i < alloc_size; i++) {
+        this->parts[i] = Particle { 0, 0, (partidx_t)(i + 1U)};
     }
 }
+
 
 partidx_t PartTable::alloc() {
     partidx_t idx = this->free_idx;
@@ -19,6 +22,3 @@ void PartTable::free(partidx_t idx) {
     this->free_idx = idx;
 }
 
-Particle& PartTable::get(partidx_t idx) {
-    return this->parts[idx];
-}

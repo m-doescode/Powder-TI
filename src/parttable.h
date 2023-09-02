@@ -1,3 +1,4 @@
+#pragma once
 #include "part.h"
 
 class PartTable {
@@ -8,5 +9,8 @@ class PartTable {
     PartTable(partidx_t alloc_size);
     partidx_t alloc();
     void free(partidx_t idx);
-    Particle& get(partidx_t idx);
+
+    inline Particle& get(partidx_t idx) {
+        return this->parts[idx];
+    }
 };

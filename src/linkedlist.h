@@ -1,3 +1,4 @@
+#pragma once
 #include "commerr.h"
 
 template <typename T>
@@ -32,6 +33,7 @@ class LinkedList {
     void insert_before(ListNode<T>* node, T value);
     void remove(ListNode<T>* node);
     void remove(size_t index);
+    ListNode<T>* find(T value);
 
     ListIterator<T> iterator();
 };
@@ -39,14 +41,15 @@ class LinkedList {
 template <typename T>
 class ListIterator {
     LinkedList<T>* list;
-    ListNode<T>* current_node;
+    ListNode<T>* _current_node;
     size_t _position = 0;
 
     public:
     ListIterator(LinkedList<T>* list);
-    T& current() { return this->current_node->current; }
+    T& current() { return this->_current_node->current; }
+    ListNode<T>* current_node() { return this->_current_node; }
     size_t position() { return this->_position; }
-    bool has_current() { return current_node != nullptr; }
+    bool has_current() { return _current_node != nullptr; }
     ListNode<T>* next();
     ListNode<T>* prev();
     void insert_after(T value);
@@ -177,6 +180,15 @@ void LinkedList<T>::remove(ListNode<T>* node) {
 }
 
 template <typename T>
+ListNode<T>* LinkedList<T>::find(T value) {
+    for (ListIterator<T> it = this->iterator(); it.has_current(); it.next()) {
+        if (it.current() == value)
+            return it.current_node();
+    }
+    return nullptr;
+}
+
+template <typename T>
 ListIterator<T> LinkedList<T>::iterator() {
     return ListIterator(this);
 }
@@ -186,37 +198,37 @@ ListIterator<T> LinkedList<T>::iterator() {
 template <typename T>
 ListIterator<T>::ListIterator(LinkedList<T>* list) {
     this->list = list;
-    this->current_node = list->at(0);
+    this->_current_node = list->at(0);
 }
 
 template <typename T>
 ListNode<T>* ListIterator<T>::next() {
-    this->current_node = this->current_node->next;
+    this->_current_node = this->_current_node->next;
     this->_position++;
-    return this->current_node;
+    return this->_current_node;
 }
 
 template <typename T>
 ListNode<T>* ListIterator<T>::prev() {
-    this->current_node = this->current_node->prev;
+    this->_current_node = this->_current_node->prev;
     this->_position--;
-    return this->current_node;
+    return this->_current_node;
 }
 
 template <typename T>
 void ListIterator<T>::insert_after(T value) {
-    this->list->insert_after(this->current_node, value);
+    this->list->insert_after(this->_current_node, value);
 }
 
 template <typename T>
 void ListIterator<T>::insert_before(T value) {
-    this->list->insert_after(this->current_node, value);
+    this->list->insert_after(this->_current_node, value);
     this->_position++;
 }
 
 template <typename T>
 void ListIterator<T>::remove() {
-    ListNode<T>* next_node = this->current_node->next;
-    this->list->remove(this->current_node);
-    this->current_node = next_node;
+    ListNode<T>* next_node = this->_current_node->next;
+    this->list->remove(this->_current_node);
+    this->_current_node = next_node;
 }
