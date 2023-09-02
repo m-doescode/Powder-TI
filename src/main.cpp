@@ -5,44 +5,82 @@
 
 #include "gfx/global_palette.h"
 
+#define TI84
 #include "linkedlist.h"
 
 static constexpr uint16_t SCREEN_WIDTH = 160, SCREEN_HEIGHT = 120;
+static constexpr uint16_t MAX_PARTS = SCREEN_WIDTH * SCREEN_HEIGHT;
+static constexpr uint16_t NO_PART = 0xFFFF;
 
 typedef uint16_t upos;
+typedef uint16_t partidx_t;
 typedef uint8_t parttype_t;
-
-struct Particle {
-    uint8_t type : 7;
-    bool movedParity : 1;
-};
 
 struct partpos_t {
     upos x;
     upos y;
 };
 
-Particle* grid = new Particle[SCREEN_WIDTH * SCREEN_HEIGHT] {};
-LinkedList<partpos_t> partArray;
+struct Particle {
+    uint8_t type : 7;
+    bool movedParity : 1;
+    partpos_t pos;
+};
+
+partidx_t* grid = new partidx_t[MAX_PARTS] { };
+LinkedList<Particle> parts;
 
 bool globalParity = 0;
 
-void set_part(upos x, upos y, parttype_t type) {
-    grid[y * SCREEN_WIDTH + x] = { type, globalParity };
+//
+
+Particle part_at(upos x, upos y) {
+    partidx_t idx = grid[y * SCREEN_WIDTH + x];
+    if (idx == NO_PART)
+        return { 0, 0, { x, y } };
+    return parts.get(idx);
 }
 
-void set_part_sim(upos x, upos y, parttype_t type) {
-    grid[y * SCREEN_WIDTH + x] = { type, !globalParity };
+partidx_t add_part(upos x, upos y, parttype_t type) {
+    if (grid[y * SCREEN_WIDTH + x] != NO_PART)
+        throw("Particle already exists at (%d, %d), value: %d\n", x, y, grid[y * SCREEN_WIDTH + x]);
+    Particle part { type, globalParity, { x, y } };
+    partidx_t idx = parts.push_back(part);
+    grid[y * SCREEN_WIDTH + x] = idx;
+    return idx;
 }
 
-Particle get_part(upos x, upos y) {
-    return grid[y * SCREEN_WIDTH + x];
+void del_part(upos x, upos y) {
+    partidx_t idx = grid[y * SCREEN_WIDTH + x];
+    grid[y * SCREEN_WIDTH + x] = NO_PART;
+    parts.remove(idx);
 }
+
+void del_part(partidx_t idx) {
+    Particle part = parts.get(idx);
+    grid[part.pos.y * SCREEN_WIDTH + part.pos.x] = NO_PART;
+    parts.remove(idx);
+}
+
+void move_part(size_t idx, upos x, upos y) {
+    // ListNode<Particle>* partNode = parts.at(idx);
+    // grid[partNode->current.pos.y * SCREEN_WIDTH + partNode->current.pos.x] = NO_PART;
+    // partNode->current.pos = { x, y };
+    Particle& part = parts.get(idx);
+    grid[part.pos.y * SCREEN_WIDTH + part.pos.x] = NO_PART;
+    part.pos = { x, y };
+}
+
+//
 
 void init_sim() {
-    for (int i = 0; i < 10; i++) {
-        set_part(i * 2 + 20, 20, 1);
+    for (int i = 0; i < MAX_PARTS; i++) {
+        grid[i] = NO_PART;
     }
+}
+
+void simulate_once() {
+
 }
 
 void draw_pixel(uint8_t x, uint8_t y, uint8_t mul) {
@@ -50,55 +88,15 @@ void draw_pixel(uint8_t x, uint8_t y, uint8_t mul) {
 }
 
 void render_sim() {
+    // Clear screen
     gfx_FillScreen(0);
-    for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-        Particle part = grid[i];
-        if (part.type > 0) {
-            gfx_SetColor(4);
-            draw_pixel(i % SCREEN_WIDTH, i / SCREEN_WIDTH, 2);
-        }
+
+    for (ListIterator it = parts.iterator(); it.has_current(); it.next()) {
+        gfx_SetColor(4);
+        draw_pixel(it.current().pos.x, it.current().pos.y, 2);
     }
+
     gfx_BlitBuffer();
-}
-
-void simulate_once() {
-    clock_t cock = clock(); // CLOck Count (K)onstant
-
-    for (int x = 0, y = 0; y < SCREEN_HEIGHT; x++) {
-        if (x >= SCREEN_WIDTH) {
-            x = 0;
-            y++;
-        }
-
-        Particle part = get_part(x, y);
-
-        // Ignore empty grid spaces
-        if (part.type == 0)
-            continue;
-
-        // Don't move the particle if already at the bottom of the sim
-        if ((y + 1) >= SCREEN_HEIGHT)
-            continue;
-
-        // Do not move if already moved based on parity bit
-        if (globalParity != part.movedParity)
-            continue;
-        
-        if (get_part(x, y + 1).type == 0) // Down
-            set_part_sim(x, y + 1, part.type);
-        else if (get_part(x + 1, y + 1).type == 0) // Down right
-            set_part_sim(x + 1, y + 1, part.type);
-        else if (get_part(x - 1, y + 1).type == 0) // Down left
-            set_part_sim(x - 1, y + 1, part.type);
-        else // Do not move
-            continue;
-
-        set_part_sim(x, y, 0);
-    }
-
-    globalParity = !globalParity;
-    
-    dbg_printf("Time taken: %f\n", ((double)(clock() - cock)) / CLOCKS_PER_SEC);
 }
 
 int main() {
@@ -115,11 +113,11 @@ int main() {
     gfx_FillScreen(0);
     gfx_BlitBuffer();
 
-    simulate_once();
+    // simulate_once();
     init_sim();
 
     for (int i = 0; i < 1000; i++) {
-    grid[i] = { 1, globalParity };
+        add_part(i % 100, i / 100, 1);
     }
 
     for (int i = 0; i < 1000; i++) {
