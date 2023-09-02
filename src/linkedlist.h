@@ -40,10 +40,12 @@ template <typename T>
 class ListIterator {
     LinkedList<T>* list;
     ListNode<T>* current_node;
+    size_t _position = 0;
 
     public:
     ListIterator(LinkedList<T>* list);
     T current() { return this->current_node->current; }
+    size_t position() { return this->_position; }
     bool has_current() { return current_node != nullptr; }
     ListNode<T>* next();
     ListNode<T>* prev();
@@ -60,12 +62,12 @@ ListNode<T>* LinkedList<T>::at(size_t index) {
         return this->_head;
     
     if (index >= _size) // TODO: Produce some kind of error
-        throw("Index too large");
+        throw("Index too large (%d/%d)", index, _size);
 
     ListNode<T>* node = this->_head;
-    for (size_t j = 0; j < _size; j++) {
+    for (size_t j = 0; j < index; j++) {
         if (node->next == nullptr) // TODO: Produce some kind of error
-            throw("Sadly, I came across an error I don't know how to handle :(");
+            throw("Index too large (%d/%d) @%x", j, _size, node);
         
         node = node->next;
     }
@@ -190,12 +192,14 @@ ListIterator<T>::ListIterator(LinkedList<T>* list) {
 template <typename T>
 ListNode<T>* ListIterator<T>::next() {
     this->current_node = this->current_node->next;
+    this->_position++;
     return this->current_node;
 }
 
 template <typename T>
 ListNode<T>* ListIterator<T>::prev() {
     this->current_node = this->current_node->prev;
+    this->_position--;
     return this->current_node;
 }
 
@@ -207,6 +211,7 @@ void ListIterator<T>::insert_after(T value) {
 template <typename T>
 void ListIterator<T>::insert_before(T value) {
     this->list->insert_after(this->current_node, value);
+    this->_position++;
 }
 
 template <typename T>
