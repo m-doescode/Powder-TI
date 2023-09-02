@@ -46,6 +46,7 @@ struct Particle {
 
 partidx_t* grid = new partidx_t[MAX_PARTS] { };
 LinkedList<Particle> parts;
+// LinkedList<Particle> activeParts;
 
 //
 
@@ -66,6 +67,7 @@ partidx_t add_part(upos x, upos y, parttype_t type) {
     Particle part { type, 0, { x, y } };
     partidx_t idx = parts.push_back(part);
     grid[y * SCREEN_WIDTH + x] = idx;
+    
     return idx;
 }
 
@@ -160,6 +162,19 @@ int main() {
 
     // simulate_once();
     init_sim();
+
+    for (int i = 0; i < 1000; i++) {
+        add_part(i % SCREEN_WIDTH, i / SCREEN_WIDTH, 1);
+    }
+
+    sw_start();
+    parts.get(10);
+    sw_stop();
+    parts.get(999);
+    sw_stop();
+
+    gfx_End();
+    abort();
 
     for (int i = 0; i < 1000; i++) {
         add_part(50, 5, 1);
