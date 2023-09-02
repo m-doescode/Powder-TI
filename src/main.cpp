@@ -97,6 +97,7 @@ void simulate_once() {
             move_part(it.position(), part.pos.x - 1, part.pos.y + 1);
         else {
             part.part_static = 1;
+            // it.remove();
         }
     }
 }
@@ -153,12 +154,13 @@ int main() {
     // abort();
 
     for (int i = 0; i < 1000; i++) {
-        // add_part(50, 5, 1);
-        // sw_start();
+        sw_start();
+        add_part(50, 5, 1);
+        sw_stop("ADD");
         simulate_once();
-        // sw_stop("SIMULATE");
+        sw_stop("SIMULATE");
         render_sim();
-        // sw_stop("RENDER");
+        sw_stop("RENDER");
     }
 
     // sleep(1);
