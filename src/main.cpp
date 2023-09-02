@@ -84,11 +84,9 @@ void del_part(partidx_t idx) {
 }
 
 void move_part(size_t idx, upos x, upos y) {
-    // ListNode<Particle>* partNode = parts.at(idx);
-    // grid[partNode->current.pos.y * SCREEN_WIDTH + partNode->current.pos.x] = NO_PART;
-    // partNode->current.pos = { x, y };
     Particle& part = parts.get(idx);
     grid[part.pos.y * SCREEN_WIDTH + part.pos.x] = NO_PART;
+    grid[y * SCREEN_WIDTH + x] = idx;
     part.pos = { x, y };
 }
 
@@ -102,10 +100,16 @@ void init_sim() {
 
 void simulate_once() {
     for (ListIterator it = parts.iterator(); it.has_current(); it.next()) {
-        partidx_t belowPartIdx = idx_at(it.current().pos + partpos_t { 0, 1 });
-        if (belowPartIdx == NO_PART) {
+        // Forgot to make sure we don't go out of bounds
+        if (it.current().pos.y >= 20)
+            continue;
+
+        if (idx_at(it.current().pos + partpos_t { 0, 1 }) == NO_PART)
             move_part(it.position(), it.current().pos.x, it.current().pos.y + 1);
-        }
+        else if (idx_at(it.current().pos + partpos_t { 1, 1 }) == NO_PART)
+            move_part(it.position(), it.current().pos.x + 1, it.current().pos.y + 1);
+        else if (idx_at(it.current().pos + partpos_t { 0, 1 } - partpos_t { 1, 0 }) == NO_PART) // Dumb ass hack bc I have the foresight of a quantum particle
+            move_part(it.position(), it.current().pos.x - 1, it.current().pos.y + 1);
     }
 }
 
