@@ -47,6 +47,11 @@ partidx_t add_part(upos x, upos y, parttype_t type) {
     return idx;
 }
 
+void try_add_part(upos x, upos y, parttype_t type) {
+    if (grid[y * SCREEN_WIDTH + x] == NO_PART)
+        add_part(x, y, type);
+}
+
 void del_part(upos x, upos y) {
     partidx_t idx = grid[y * SCREEN_WIDTH + x];
     grid[y * SCREEN_WIDTH + x] = NO_PART;
@@ -78,6 +83,28 @@ void init_sim() {
     }
 }
 
+void draw_pixel(uint8_t x, uint8_t y, uint8_t mul) {
+    gfx_FillRectangle(x * mul, y * mul, mul, mul);
+}
+
+void move_part2(Particle part, size_t idx, upos x, upos y) {
+    if (part.pos.y > 0) {
+        for (int x = -1; x < 1; x++) {
+            partidx_t idx = grid[(part.pos.y - 1) * SCREEN_WIDTH + part.pos.x + x];
+            Particle& part = parts.get(idx);
+            if (part.part_static)
+                activeParts.push_back(idx);
+            part.part_static = 0;
+        }
+    }
+
+    gfx_SetColor(0);
+    draw_pixel(part.pos.x, part.pos.y, 2);
+    move_part(idx, x, y);
+    gfx_SetColor(4);
+    draw_pixel(x, y, 2);
+}
+
 void simulate_once() {
     for (ListIterator it = activeParts.iterator(); it.has_current(); it.next()) {
         Particle& part = parts.get(it.current());
@@ -88,36 +115,32 @@ void simulate_once() {
             continue;
         }
 
-        sw_start();
+        // sw_start();
         if (idx_at(part.pos + partpos_t { 0, 1 }) == NO_PART)
-            move_part(it.position(), part.pos.x, part.pos.y + 1);
+            move_part2(part, it.current(), part.pos.x, part.pos.y + 1);
         else if (idx_at(part.pos + partpos_t { 1, 1 }) == NO_PART)
-            move_part(it.position(), part.pos.x + 1, part.pos.y + 1);
+            move_part2(part, it.current(), part.pos.x + 1, part.pos.y + 1);
         else if (idx_at(part.pos + partpos_t { 0, 1 } - partpos_t { 1, 0 }) == NO_PART) // Dumb ass hack bc I have the foresight of a quantum particle
-            move_part(it.position(), part.pos.x - 1, part.pos.y + 1);
+            move_part2(part, it.current(), part.pos.x - 1, part.pos.y + 1);
         else {
             part.part_static = 1;
-            // it.remove();
+            it.remove();
         }
     }
-}
-
-void draw_pixel(uint8_t x, uint8_t y, uint8_t mul) {
-    gfx_FillRectangle(x * mul, y * mul, mul, mul);
+    gfx_BlitBuffer();
 }
 
 void render_sim() {
     // Clear screen
-    gfx_FillScreen(0);
+    // gfx_FillScreen(0);
 
-    for (partidx_t i = 0; i < MAX_GRID; i++) {
-        if (grid[i] != NO_PART) {
-            gfx_SetColor(4);
-            draw_pixel(i % SCREEN_WIDTH, i / SCREEN_WIDTH, 2);
-        }
-    }
+    // for (ListIterator<partidx_t> it = renderParts.iterator(); it.has_current(); it.next()) {
+    //     Particle part = parts.get(it.current());
+    //     gfx_SetColor(4);
+    //     draw_pixel(part.pos.x, part.pos.y, 2);
+    // }
 
-    gfx_BlitBuffer();
+    // gfx_BlitBuffer();
 }
 
 int main() {
@@ -154,13 +177,13 @@ int main() {
     // abort();
 
     for (int i = 0; i < 1000; i++) {
-        sw_start();
-        add_part(50, 5, 1);
-        sw_stop("ADD");
+        // sw_start();
+        try_add_part(50, 5, 1);
+        // sw_stop("ADD");
         simulate_once();
-        sw_stop("SIMULATE");
+        // sw_stop("SIMULATE");
         render_sim();
-        sw_stop("RENDER");
+        // sw_stop("RENDER");
     }
 
     // sleep(1);
