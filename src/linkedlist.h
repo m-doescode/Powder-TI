@@ -44,7 +44,7 @@ class ListIterator {
 
     public:
     ListIterator(LinkedList<T>* list);
-    T current() { return this->current_node->current; }
+    T& current() { return this->current_node->current; }
     size_t position() { return this->_position; }
     bool has_current() { return current_node != nullptr; }
     ListNode<T>* next();
