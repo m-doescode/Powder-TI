@@ -142,26 +142,13 @@ int main() {
     // simulate_once();
     init_sim();
 
-    for (int i = 0; i < 5; i++) {
-        add_part(50 + i * 2, 19, 1);
-    }
-
-    sw_start();
-    simulate_once();
-    sw_stop("SIMULATE");
-    render_sim();
-    sw_stop("RENDER");
-
     for (int i = 0; i < 1000; i++) {
-        add_part(i % 100 + 20, i / 100 + 20, 1);
-    }
-
-    for (int i = 0; i < 1 /*1000*/; i++) {
-        sw_start();
+        add_part(50, 5, 1);
+        // sw_start();
         simulate_once();
-        sw_stop("SIMULATE");
+        // sw_stop("SIMULATE");
         render_sim();
-        sw_stop("RENDER");
+        // sw_stop("RENDER");
     }
 
     // sleep(1);
