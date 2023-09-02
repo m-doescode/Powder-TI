@@ -1,3 +1,5 @@
+#include "commerr.h"
+
 template <typename T>
 class ListIterator;
 
@@ -21,9 +23,9 @@ class LinkedList {
     ListNode<T>* tail() { return _tail; }
     
     ListNode<T>* at(size_t index);
-    T get(size_t index);
+    T& get(size_t index);
 
-    void push_back(T value);
+    size_t push_back(T value);
     void push_front(T value);
     void insert(size_t index, T value);
     void insert_after(ListNode<T>* node, T value);
@@ -58,12 +60,12 @@ ListNode<T>* LinkedList<T>::at(size_t index) {
         return this->_head;
     
     if (index >= _size) // TODO: Produce some kind of error
-        throw "Index out of bounds";
+        throw("Index too large");
 
     ListNode<T>* node = this->_head;
     for (size_t j = 0; j < _size; j++) {
         if (node->next == nullptr) // TODO: Produce some kind of error
-            throw "Index out of bounds";
+            throw("Sadly, I came across an error I don't know how to handle :(");
         
         node = node->next;
     }
@@ -72,16 +74,16 @@ ListNode<T>* LinkedList<T>::at(size_t index) {
 }
 
 template <typename T>
-T LinkedList<T>::get(size_t index) {
+T& LinkedList<T>::get(size_t index) {
     ListNode<T>* node = at(index);
     if (node == nullptr) // TODO: Produce some kind of error
-        throw "Index out of bounds";
+        throw("Sadly, I came across an error I don't know how to handle :(");
 
     return node->current;
 }
 
 template <typename T>
-void LinkedList<T>::push_back(T value) {
+size_t LinkedList<T>::push_back(T value) {
     ListNode<T>* node = new ListNode<T> { value, nullptr, this->_tail };
     if (this->_tail)
         this->_tail->next = node;
@@ -89,6 +91,7 @@ void LinkedList<T>::push_back(T value) {
         this->_head = node;
     this->_tail = node;
     this->_size++;
+    return this->_size - 1;
 }
 
 template <typename T>
@@ -110,11 +113,11 @@ void LinkedList<T>::insert(size_t index, T value) {
     }
 
     if (index > _size) // TODO: Produce some kind of error
-        throw "Index out of bounds";
+        throw("Sadly, I came across an error I don't know how to handle :(");
         
     ListNode<T>* precendant = at(index - 1);
     if (precendant == nullptr) // TODO: Produce some kind of error
-        throw "Index out of bounds";
+        throw("Sadly, I came across an error I don't know how to handle :(");
 
     insert_after(precendant, value);
 }
@@ -149,7 +152,7 @@ template <typename T>
 void LinkedList<T>::remove(size_t index) {
     ListNode<T>* node = at(index);
     if (node == nullptr) // TODO: Produce some kind of error
-        throw "Index out of bounds";
+        throw("Sadly, I came across an error I don't know how to handle :(");
     remove(node);
 }
 
