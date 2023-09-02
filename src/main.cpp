@@ -5,6 +5,8 @@
 
 #include "gfx/global_palette.h"
 
+#include "linkedlist.h"
+
 static constexpr uint16_t SCREEN_WIDTH = 160, SCREEN_HEIGHT = 120;
 
 typedef uint16_t upos;
@@ -15,7 +17,13 @@ struct Particle {
     bool movedParity : 1;
 };
 
+struct partpos_t {
+    upos x;
+    upos y;
+};
+
 Particle* grid = new Particle[SCREEN_WIDTH * SCREEN_HEIGHT] {};
+LinkedList<partpos_t> partArray;
 
 bool globalParity = 0;
 
