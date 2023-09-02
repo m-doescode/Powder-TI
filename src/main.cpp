@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "gfx/global_palette.h"
+#include "stopwatch.h"
 
 #define TI84
 #include "linkedlist.h"
@@ -19,6 +20,22 @@ typedef uint8_t parttype_t;
 struct partpos_t {
     upos x;
     upos y;
+
+    partpos_t operator +(const partpos_t other) {
+        return { (upos)(x + other.x), (upos)(y + other.y) };
+    }
+
+    partpos_t operator -(const partpos_t other) {
+        return { (upos)(x - other.x), (upos)(y - other.y) };
+    }
+
+    partpos_t operator *(const partpos_t other) {
+        return { (upos)(x * other.x), (upos)(y * other.y) };
+    }
+
+    partpos_t operator /(const partpos_t other) {
+        return { (upos)(x / other.x), (upos)(y / other.y) };
+    }
 };
 
 struct Particle {
@@ -39,6 +56,10 @@ Particle part_at(upos x, upos y) {
     if (idx == NO_PART)
         return { 0, 0, { x, y } };
     return parts.get(idx);
+}
+
+partidx_t idx_at(partpos_t pos) {
+    return grid[pos.y * SCREEN_WIDTH + pos.x];
 }
 
 partidx_t add_part(upos x, upos y, parttype_t type) {
@@ -80,7 +101,12 @@ void init_sim() {
 }
 
 void simulate_once() {
-
+    for (ListIterator it = parts.iterator(); it.has_current(); it.next()) {
+        partidx_t belowPartIdx = idx_at(it.current().pos + partpos_t { 0, 1 });
+        if (belowPartIdx == NO_PART) {
+            move_part(it.position(), it.current().pos.x, it.current().pos.y + 1);
+        }
+    }
 }
 
 void draw_pixel(uint8_t x, uint8_t y, uint8_t mul) {
@@ -116,13 +142,26 @@ int main() {
     // simulate_once();
     init_sim();
 
-    for (int i = 0; i < 1000; i++) {
-        add_part(i % 100, i / 100, 1);
+    for (int i = 0; i < 5; i++) {
+        add_part(50 + i * 2, 19, 1);
     }
 
+    sw_start();
+    simulate_once();
+    sw_stop("SIMULATE");
+    render_sim();
+    sw_stop("RENDER");
+
     for (int i = 0; i < 1000; i++) {
+        add_part(i % 100 + 20, i / 100 + 20, 1);
+    }
+
+    for (int i = 0; i < 1 /*1000*/; i++) {
+        sw_start();
         simulate_once();
+        sw_stop("SIMULATE");
         render_sim();
+        sw_stop("RENDER");
     }
 
     // sleep(1);
