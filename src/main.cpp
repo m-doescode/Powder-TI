@@ -40,14 +40,12 @@ struct partpos_t {
 
 struct Particle {
     uint8_t type : 7;
-    bool movedParity : 1;
+    bool part_static : 1;
     partpos_t pos;
 };
 
 partidx_t* grid = new partidx_t[MAX_PARTS] { };
 LinkedList<Particle> parts;
-
-bool globalParity = 0;
 
 //
 
@@ -65,7 +63,7 @@ partidx_t idx_at(partpos_t pos) {
 partidx_t add_part(upos x, upos y, parttype_t type) {
     if (grid[y * SCREEN_WIDTH + x] != NO_PART)
         throw("Particle already exists at (%d, %d), value: %d\n", x, y, grid[y * SCREEN_WIDTH + x]);
-    Particle part { type, globalParity, { x, y } };
+    Particle part { type, 0, { x, y } };
     partidx_t idx = parts.push_back(part);
     grid[y * SCREEN_WIDTH + x] = idx;
     return idx;
@@ -99,18 +97,35 @@ void init_sim() {
 }
 
 void simulate_once() {
+    sw_start();
     for (ListIterator it = parts.iterator(); it.has_current(); it.next()) {
-        // Forgot to make sure we don't go out of bounds
-        if (it.current().pos.y >= 20)
+        if (it.current().part_static) {
+            // dbg_printf("Ignored bc static\n");
             continue;
+        }
 
+        sw_stop("IT_STEP");
+        
+        // Forgot to make sure we don't go out of bounds
+        if (it.current().pos.y >= 20 /*(SCREEN_HEIGHT - 1)*/) {
+            it.current().part_static = 1;
+            continue;
+        }
+
+        sw_start();
         if (idx_at(it.current().pos + partpos_t { 0, 1 }) == NO_PART)
             move_part(it.position(), it.current().pos.x, it.current().pos.y + 1);
         else if (idx_at(it.current().pos + partpos_t { 1, 1 }) == NO_PART)
             move_part(it.position(), it.current().pos.x + 1, it.current().pos.y + 1);
         else if (idx_at(it.current().pos + partpos_t { 0, 1 } - partpos_t { 1, 0 }) == NO_PART) // Dumb ass hack bc I have the foresight of a quantum particle
             move_part(it.position(), it.current().pos.x - 1, it.current().pos.y + 1);
+        else {
+            it.current().part_static = 1;
+        }
+        sw_stop("CHECKS");
+        sw_start();
     }
+    sw_stop();
 }
 
 void draw_pixel(uint8_t x, uint8_t y, uint8_t mul) {
